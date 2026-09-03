@@ -17,7 +17,7 @@ def _encode_content(content: str) -> bytes:
     return content.encode("utf-8")
 
 
-def save_file(path: str, content: str, buffer_size: int = DEFAULT_BUFFER_SIZE) -> None:
+def save_file(path: str, content: str) -> None:
     """Save content to a file, writing in chunks sized by byte length.
 
     Uses a temporary file and atomic rename to prevent data corruption
@@ -28,7 +28,6 @@ def save_file(path: str, content: str, buffer_size: int = DEFAULT_BUFFER_SIZE) -
     Args:
         path: Destination file path.
         content: The text content to save.
-        buffer_size: Maximum number of bytes per write chunk.
 
     Raises:
         OSError: If the file cannot be written.
@@ -41,12 +40,13 @@ def save_file(path: str, content: str, buffer_size: int = DEFAULT_BUFFER_SIZE) -
     try:
         offset = 0
         while offset < len(data):
-            chunk = data[offset : offset + buffer_size]
+            chunk = data[offset : offset + DEFAULT_BUFFER_SIZE]
             os.write(fd, chunk)
             offset += len(chunk)
         os.fsync(fd)
-        os.close(fd)
-        fd = -1  # Mark as closed so the finally block doesn't double-close.
+        closed_fd = fd
+        fd = -1  # Mark as closed before os.close to prevent double-close.
+        os.close(closed_fd)
         os.replace(tmp_path, path)
     except BaseException:
         # Clean up the temp file on failure.
