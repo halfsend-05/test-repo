@@ -3,6 +3,7 @@
 import os
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from file_writer import BUFFER_SIZE, _utf8_safe_boundary, save_file
 
@@ -104,6 +105,21 @@ class TestSaveFile(unittest.TestCase):
     def test_save_empty_file(self):
         """Edge case: empty content produces an empty file."""
         self.assertEqual(self._roundtrip(""), "")
+
+    def test_save_raises_on_no_progress(self):
+        """The no-progress guard raises ValueError when boundary cannot advance."""
+        # Mock _utf8_safe_boundary to always return 0, simulating a
+        # situation where the boundary function cannot make forward progress.
+        with patch("file_writer._utf8_safe_boundary", return_value=0):
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".txt") as tmp:
+                path = tmp.name
+            try:
+                with self.assertRaises(ValueError) as ctx:
+                    save_file(path, "hello")
+                self.assertIn("no progress", str(ctx.exception).lower())
+            finally:
+                if os.path.exists(path):
+                    os.unlink(path)
 
 
 if __name__ == "__main__":

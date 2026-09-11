@@ -5,6 +5,9 @@ boundaries never split a multibyte UTF-8 character.  Previous versions
 used a naive byte-offset split, which produced invalid byte sequences
 at the boundary and caused crashes when the downstream consumer
 validated the encoding.
+
+BUFFER_SIZE must be at least 4 — the maximum width of a single UTF-8
+character — to guarantee forward progress on every chunk.
 """
 
 BUFFER_SIZE = 65536  # 64 KiB
@@ -39,7 +42,16 @@ def _utf8_safe_boundary(data: bytes, limit: int) -> int:
 
 
 def save_file(path: str, content: str) -> None:
-    """Write *content* to *path* using buffered, UTF-8-safe chunking."""
+    """Write *content* to *path* using buffered, UTF-8-safe chunking.
+
+    Callers are responsible for validating *path* before calling this
+    function (e.g. resolving symlinks, rejecting directory-traversal
+    sequences, or confining writes to an allowed directory).
+    """
+    assert BUFFER_SIZE >= 4, (
+        f"BUFFER_SIZE must be >= 4 to guarantee progress on any valid "
+        f"UTF-8 character, got {BUFFER_SIZE}"
+    )
     data = content.encode("utf-8")
 
     with open(path, "wb") as fh:
