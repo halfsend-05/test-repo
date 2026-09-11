@@ -47,5 +47,9 @@ def save_file(path: str, content: str) -> None:
         while offset < len(data):
             end = min(offset + BUFFER_SIZE, len(data))
             end = _utf8_safe_boundary(data, end)
+            if end <= offset:
+                raise ValueError(
+                    f"UTF-8 safe boundary made no progress at offset {offset}"
+                )
             fh.write(data[offset:end])
             offset = end
