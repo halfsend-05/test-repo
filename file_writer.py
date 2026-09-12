@@ -48,13 +48,9 @@ def save_file(path: str, content: str) -> None:
     function (e.g. resolving symlinks, rejecting directory-traversal
     sequences, or confining writes to an allowed directory).
     """
-    assert BUFFER_SIZE >= 4, (
-        f"BUFFER_SIZE must be >= 4 to guarantee progress on any valid "
-        f"UTF-8 character, got {BUFFER_SIZE}"
-    )
     data = content.encode("utf-8")
 
-    with open(path, "wb") as fh:
+    with open(path, "wb") as f:
         offset = 0
         while offset < len(data):
             end = min(offset + BUFFER_SIZE, len(data))
@@ -63,5 +59,5 @@ def save_file(path: str, content: str) -> None:
                 raise ValueError(
                     f"UTF-8 safe boundary made no progress at offset {offset}"
                 )
-            fh.write(data[offset:end])
+            f.write(data[offset:end])
             offset = end

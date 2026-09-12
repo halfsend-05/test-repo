@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Tests for file_writer — UTF-8-safe buffered writes."""
 
 import os
@@ -59,8 +60,8 @@ class TestSaveFile(unittest.TestCase):
             path = tmp.name
         try:
             save_file(path, content)
-            with open(path, "r", encoding="utf-8") as fh:
-                return fh.read()
+            with open(path, "r", encoding="utf-8") as f:
+                return f.read()
         finally:
             os.unlink(path)
 
