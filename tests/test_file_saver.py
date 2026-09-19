@@ -93,7 +93,7 @@ class TestSaveLargeUTF8(_SaveFileTestBase):
         content = (
             "ASCII text\n"
             + "éàü" * 5000  # 2-byte chars
-            + "世界" * 5000         # 3-byte CJK
+            + "世界" * 5000  # 3-byte CJK
             + "\U0001f600\U0001f4a9" * 5000  # 4-byte emoji
         )
         self.assertGreater(self._byte_len(content), 64 * 1024)
@@ -105,7 +105,7 @@ class TestSaveLargeUTF8(_SaveFileTestBase):
         path = os.path.join(self._tmp_dir, "edge.txt")
         # 16384 emoji × 4 bytes = 65536 bytes, char count = 16384
         content = "\U0001f600" * 16384
-        self.assertEqual(len(content), 16384)       # char count under 64K
+        self.assertEqual(len(content), 16384)  # char count under 64K
         self.assertEqual(self._byte_len(content), 65536)  # byte count exactly 64K
         save_file(path, content)
         self.assertEqual(self._read(path), content)

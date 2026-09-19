@@ -1,7 +1,7 @@
 """File saver module with correct UTF-8 multibyte character handling.
 
 Provides file saving functionality that properly handles UTF-8 encoded
-text of any size.  Buffer allocation uses byte length rather than
+text of any size. Buffer allocation uses byte length rather than
 character count to prevent buffer overflows when saving files containing
 multibyte characters (e.g., emoji, CJK characters).
 """
