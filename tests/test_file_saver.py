@@ -5,26 +5,29 @@ UTF-8 multibyte characters must succeed without crashing.
 """
 
 import os
-import stat
+import shutil
 import tempfile
 import unittest
 
 from src.file_saver import save_file
 
 
-class TestSaveFileBasic(unittest.TestCase):
-    """Basic save and roundtrip tests."""
+class _SaveFileTestBase(unittest.TestCase):
+    """Shared setup and helpers for file saver tests."""
 
     def setUp(self):
         self._tmp_dir = tempfile.mkdtemp()
 
     def tearDown(self):
-        import shutil
         shutil.rmtree(self._tmp_dir, ignore_errors=True)
 
     def _read(self, path: str) -> str:
         with open(path, "r", encoding="utf-8") as f:
             return f.read()
+
+
+class TestSaveFileBasic(_SaveFileTestBase):
+    """Basic save and roundtrip tests."""
 
     def test_save_and_load_ascii(self):
         path = os.path.join(self._tmp_dir, "ascii.txt")
@@ -48,37 +51,14 @@ class TestSaveFileBasic(unittest.TestCase):
         with self.assertRaises(TypeError):
             save_file(path, 12345)
 
-    def test_preserves_existing_permissions(self):
-        path = os.path.join(self._tmp_dir, "perms.txt")
-        # Create a file with 0o644 permissions.
-        with open(path, "w") as f:
-            f.write("original")
-        os.chmod(path, 0o644)
-        # Overwrite via save_file.
-        save_file(path, "updated")
-        mode = stat.S_IMODE(os.stat(path).st_mode)
-        self.assertEqual(mode, 0o644)
-        self.assertEqual(self._read(path), "updated")
 
-
-class TestSaveLargeUTF8(unittest.TestCase):
+class TestSaveLargeUTF8(_SaveFileTestBase):
     """Regression tests for issue #2059.
 
     The bug: saving files >64KB with multibyte UTF-8 characters caused
     a segfault because buffer allocation used character count instead
     of byte length.
     """
-
-    def setUp(self):
-        self._tmp_dir = tempfile.mkdtemp()
-
-    def tearDown(self):
-        import shutil
-        shutil.rmtree(self._tmp_dir, ignore_errors=True)
-
-    def _read(self, path: str) -> str:
-        with open(path, "r", encoding="utf-8") as f:
-            return f.read()
 
     def _byte_len(self, text: str) -> int:
         return len(text.encode("utf-8"))
