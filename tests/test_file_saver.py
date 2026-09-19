@@ -30,17 +30,20 @@ class TestSaveFileBasic(_SaveFileTestBase):
     """Basic save and roundtrip tests."""
 
     def test_save_and_load_ascii(self):
+        """Save and reload a short ASCII string."""
         path = os.path.join(self._tmp_dir, "ascii.txt")
         content = "Hello, World!"
         save_file(path, content)
         self.assertEqual(self._read(path), content)
 
     def test_save_and_load_empty(self):
+        """Save and reload an empty string."""
         path = os.path.join(self._tmp_dir, "empty.txt")
         save_file(path, "")
         self.assertEqual(self._read(path), "")
 
     def test_rejects_invalid_type(self):
+        """Passing a non-str value raises TypeError."""
         path = os.path.join(self._tmp_dir, "bad.txt")
         with self.assertRaises(TypeError):
             save_file(path, 12345)
