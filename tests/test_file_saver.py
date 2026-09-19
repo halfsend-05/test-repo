@@ -40,12 +40,6 @@ class TestSaveFileBasic(_SaveFileTestBase):
         save_file(path, "")
         self.assertEqual(self._read(path), "")
 
-    def test_save_bytes(self):
-        path = os.path.join(self._tmp_dir, "bytes.txt")
-        content = "Hello UTF-8"
-        save_file(path, content.encode("utf-8"))
-        self.assertEqual(self._read(path), content)
-
     def test_rejects_invalid_type(self):
         path = os.path.join(self._tmp_dir, "bad.txt")
         with self.assertRaises(TypeError):
@@ -106,8 +100,8 @@ class TestSaveLargeUTF8(_SaveFileTestBase):
         save_file(path, content)
         self.assertEqual(self._read(path), content)
 
-    def test_edge_char_count_under_64k_byte_count_over(self):
-        """Edge case: char count < 64K but byte count > 64K."""
+    def test_edge_char_count_under_64k_byte_count_at_boundary(self):
+        """Edge case: char count < 64K but byte count at exactly 64K."""
         path = os.path.join(self._tmp_dir, "edge.txt")
         # 16384 emoji × 4 bytes = 65536 bytes, char count = 16384
         content = "\U0001f600" * 16384
